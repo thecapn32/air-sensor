@@ -1,0 +1,3 @@
+- adafruit mcp23017 lib integration
+- setup to sample only from sen1
+- library for sg4 sensor

@@ -1,0 +1,5 @@
+build/
+dependencies.lock
+.sdk*
+sdkconfig.old
+main/.*
