@@ -87,6 +87,9 @@ static int sample_sen(int num)
 	xunit.digitalWrite(EN_3V3_SEN, 1);
 	xunit.digitalWrite(MUX_EN_0, 1);
 	xunit.digitalWrite(0, 1);
+	xunit.digitalWrite(1, 0);
+	xunit.digitalWrite(2, 1);
+	xunit.digitalWrite(3, 1);
 	ESP_LOGI("ss", "%d %d", xunit.digitalRead(EN_3V3_SEN), xunit.digitalRead(EN_3V3_SEN));
 	sample();	
 	return 0;
