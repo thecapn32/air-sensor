@@ -20,16 +20,25 @@ EspSoftwareSerial::UART swSer1;
 extern "C" int sample()
 {
 	 uint8_t buff[] = {0xFF, 0x03, 0x10, 0x20, 0x00, 0x01, 0x94, 0xDE};
-	
+	int i = 0;
 	while (1) {
-		//int l = uart_write_bytes(uart_num, buff, 8);
+		xunit.digitalWrite(0, i & 0x1);
+		xunit.digitalWrite(1, (i & 0x2) >> 1);
+		xunit.digitalWrite(2, (i & 0x4) >> 2);
+		xunit.digitalWrite(3, (i & 0x8) >> 3);
+		i++;
+		vTaskDelay(pdMS_TO_TICKS(100));
+		if (i == 16) {
+			i = 0;
+		}
+		int l = uart_write_bytes(uart_num, buff, 8);
+		vTaskDelay(pdMS_TO_TICKS(100));
+		//swSer1.write(buff, 8);
 		
-		swSer1.write(buff, 8);
-		
-		//l = uart_read_bytes(uart_num, buff, 8, pdMS_TO_TICKS(40));
-		int l = swSer1.read(buff, 8);
-		ESP_LOGI("sample res", "reeeeeeeead l value %d", l);
-		if ( swSer1.available() > 0) {
+		l = uart_read_bytes(uart_num, buff, 8, pdMS_TO_TICKS(200));
+		//int l = swSer1.read(buff, 8);
+		ESP_LOGI("sample res", "read value %d from sensor %d", l, i);
+		if (l > 0) {
 			for (int i = 0; i < 8; i++) {
 				ESP_LOGI("res", "%x", buff[i]);
 			}
@@ -45,20 +54,20 @@ extern "C" int sample()
 
  int uart_setup()
 {
-	// uart_config_t uart_config = {
-	// 	.baud_rate = 9600,
-	// 	.data_bits = UART_DATA_8_BITS,
-	// 	.parity = UART_PARITY_DISABLE,
-	// 	.stop_bits = UART_STOP_BITS_1,
-	// 	.flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-	// 	.source_clk = UART_SCLK_APB,
-	// };
+	uart_config_t uart_config = {
+		.baud_rate = 9600,
+		.data_bits = UART_DATA_8_BITS,
+		.parity = UART_PARITY_DISABLE,
+		.stop_bits = UART_STOP_BITS_1,
+		.flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+		.source_clk = UART_SCLK_APB,
+	};
 
-	// esp_err_t ret = uart_driver_install(uart_num, 512, 0, 0, NULL, 0); 
-	// ret = uart_param_config(uart_num, &uart_config);
-	// ret = uart_set_pin(uart_num, GPIO_NUM_16, GPIO_NUM_15, -1, -1);
+	esp_err_t ret = uart_driver_install(uart_num, 512, 0, 0, NULL, 0); 
+	ret = uart_param_config(uart_num, &uart_config);
+	ret = uart_set_pin(uart_num, GPIO_NUM_16, GPIO_NUM_15, -1, -1);
 
-	swSer1.begin(9600, EspSoftwareSerial::SWSERIAL_8N1, 15, 16, false, 256);
+	//swSer1.begin(9600, EspSoftwareSerial::SWSERIAL_8N1, 15, 16, false, 256);
 
 
 
@@ -85,10 +94,7 @@ static int sample_sen(int num)
 {
 	xunit.digitalWrite(EN_3V3_SEN, 1);
 	xunit.digitalWrite(MUX_EN_0, 1);
-	xunit.digitalWrite(0, 1);
-	xunit.digitalWrite(1, 0);
-	xunit.digitalWrite(2, 1);
-	xunit.digitalWrite(3, 1);
+	
 	ESP_LOGI("ss", "%d %d", xunit.digitalRead(EN_3V3_SEN), xunit.digitalRead(EN_3V3_SEN));
 	sample();	
 	return 0;
